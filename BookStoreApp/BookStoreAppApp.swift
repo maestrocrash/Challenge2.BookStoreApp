@@ -2,16 +2,47 @@
 //  BookStoreAppApp.swift
 //  BookStoreApp
 //
-//  Created by Aleksandr Rybachev on 03.12.2023.
+//  Created by Aleksandr Rybachev on 07.12.2023.
 //
 
 import SwiftUI
+import FirebaseCore
+import FirebaseDatabase
+
+final class AppDelegate: NSObject, UIApplicationDelegate {
+    
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
+        FirebaseApp.configure()
+        return true
+    }
+}
 
 @main
 struct BookStoreAppApp: App {
+    
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    
+    @AppStorage("isOnboarding") var isOnboarding: Bool = true
+    
+    @StateObject private var viewModel = BookAppViewModel()
+    @StateObject private var user = User()
+    @StateObject private var coreData = CoreData()
+    
+    var appearanceSwitch: ColorScheme? {
+        viewModel.isLightTheme ? .light : .dark
+    }
+
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            if isOnboarding {
+                OnboardingView()
+                    .environmentObject(viewModel)
+            } else {
+                TabBarView()
+                    .environmentObject(viewModel)
+                    .environmentObject(user)
+                    .environmentObject(coreData)
+            }
         }
     }
 }
